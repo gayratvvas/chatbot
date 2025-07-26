@@ -2,12 +2,15 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewpts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Чат-бот GS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #fff; /* Белый фон */
-            overflow: hidden; /* Скрыть прокрутку для анимации */
+            background-color: #fff; /* White background */
+            overflow: hidden; /* Hide scroll for animation */
             position: relative;
             min-height: 100vh;
             display: flex;
@@ -21,17 +24,17 @@
             height: 100%;
             top: 0;
             left: 0;
-            pointer-events: none; /* Чтобы не мешать взаимодействию */
+            pointer-events: none; /* To not interfere with interaction */
             overflow: hidden;
         }
 
         .heart {
             position: absolute;
-            background-color: #FF69B4; /* Розовый */
-            /* Удалена ротация для вертикального положения */
-            animation: floatDown 10s infinite ease-in-out; /* Изменено на floatDown */
-            opacity: 0; /* Изначально невидимый */
-            border-radius: 50% 50% 0 0; /* Форма сердца */
+            background-color: #FF69B4; /* Pink */
+            /* No rotation for vertical position */
+            animation: floatDown 10s infinite ease-in-out; /* Changed to floatDown */
+            opacity: 0; /* Initially invisible */
+            border-radius: 50% 50% 0 0; /* Heart shape */
         }
 
         .heart::before,
@@ -40,7 +43,7 @@
             position: absolute;
             width: 100%;
             height: 100%;
-            background-color: #FF69B4; /* Розовый */
+            background-color: #FF69B4; /* Pink */
             border-radius: 50%;
         }
 
@@ -52,9 +55,9 @@
             top: -50%;
         }
 
-        @keyframes floatDown { /* Изменено для движения сверху вниз */
+        @keyframes floatDown { /* Changed for top-to-bottom movement */
             0% {
-                transform: translateY(-100px); /* Начинается чуть выше экрана */
+                transform: translateY(-100px); /* Starts slightly above the screen */
                 opacity: 0;
             }
             20% {
@@ -64,30 +67,30 @@
                 opacity: 0.8;
             }
             100% {
-                transform: translateY(100vh); /* Уходит за нижний край экрана */
+                transform: translateY(100vh); /* Goes off the bottom of the screen */
                 opacity: 0;
             }
         }
 
         .chat-container {
-            background-color: #f0f0f0; /* Светло-серый для контейнера */
-            border-radius: 1.5rem; /* Закругленные углы */
+            background-color: #f0f0f0; /* Light gray for container */
+            border-radius: 1.5rem; /* Rounded corners */
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
             max-width: 600px;
             width: 90%;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            border: 2px solid #FF69B4; /* Розовая рамка (была золотая) */
+            border: 2px solid #FF69B4; /* Pink border */
             position: relative;
-            z-index: 10; /* Над анимацией */
+            z-index: 10; /* Above animation */
         }
 
         .chat-header {
-            background-color: #fff; /* Белый (была черная) */
-            color: #000; /* Черный текст (был золотой) */
+            background-color: #fff; /* White */
+            color: #000; /* Black text */
             padding: 1rem 1.5rem;
-            border-bottom: 1px solid #FF69B4; /* Розовый (была золотая) */
+            border-bottom: 1px solid #FF69B4; /* Pink */
             font-weight: bold;
             font-size: 1.25rem;
             text-align: center;
@@ -98,8 +101,8 @@
             flex-grow: 1;
             padding: 1.5rem;
             overflow-y: auto;
-            max-height: 70vh; /* Ограничение высоты для прокрутки */
-            background-color: #fff; /* Белый фон для сообщений (был черный) */
+            max-height: 70vh; /* Max height for scrolling */
+            background-color: #fff; /* White background for messages */
         }
 
         .message {
@@ -127,43 +130,43 @@
         }
 
         .message.user .message-bubble {
-            background-color: #FF69B4; /* Розовый */
-            color: #fff; /* Белый текст */
+            background-color: #FF69B4; /* Pink */
+            color: #fff; /* White text */
             border-bottom-right-radius: 0.25rem;
         }
 
         .message.bot .message-bubble {
-            background-color: #e0e0e0; /* Светло-серый для сообщений бота */
-            color: #000; /* Черный текст */
+            background-color: #e0e0e0; /* Light gray for bot messages */
+            color: #000; /* Black text */
             border-bottom-left-radius: 0.25rem;
         }
 
         .chat-input-area {
             display: flex;
             padding: 1.5rem;
-            background-color: #fff; /* Белый (была черная) */
-            border-top: 1px solid #FF69B4; /* Розовый (была золотая) */
+            background-color: #fff; /* White */
+            border-top: 1px solid #FF69B4; /* Pink */
             border-radius: 0 0 1.5rem 1.5rem;
         }
 
         .chat-input {
             flex-grow: 1;
             padding: 0.75rem 1rem;
-            border: 1px solid #FF69B4; /* Розовая рамка (была золотая) */
+            border: 1px solid #FF69B4; /* Pink border */
             border-radius: 0.75rem;
-            background-color: #f8f8f8; /* Очень светло-серый для ввода */
-            color: #000; /* Черный текст (был белый) */
+            background-color: #f8f8f8; /* Very light gray for input */
+            color: #000; /* Black text */
             outline: none;
             transition: border-color 0.3s ease;
         }
 
         .chat-input:focus {
-            border-color: #FF69B4; /* Розовый при фокусе */
+            border-color: #FF69B4; /* Pink on focus */
         }
 
         .send-button {
-            background-color: #FF69B4; /* Розовый (был золотой) */
-            color: #fff; /* Белый текст (был черный) */
+            background-color: #FF69B4; /* Pink */
+            color: #fff; /* White text */
             padding: 0.75rem 1.25rem;
             border-radius: 0.75rem;
             margin-left: 1rem;
@@ -174,18 +177,18 @@
         }
 
         .send-button:hover {
-            background-color: #e05cb4; /* Более темный розовый (был более темный золотой) */
+            background-color: #e05cb4; /* Darker pink */
             transform: translateY(-2px);
         }
 
         .loading-indicator {
             text-align: center;
             padding: 1rem;
-            color: #FF69B4; /* Розовый (был золотой) */
+            color: #FF69B4; /* Pink */
             font-style: italic;
         }
 
-        /* Адаптивный дизайн */
+        /* Responsive design */
         @media (max-width: 768px) {
             .chat-container {
                 width: 95%;
@@ -216,7 +219,7 @@
             Чат GS
         </div>
         <div class="chat-messages" id="chatMessages">
-            <!-- Сообщения будут здесь -->
+            <!-- Messages will be here -->
             <div class="message bot">
                 <div class="message-bubble">
                     Привет! Я чат-бот GS. Чем могу помочь?
@@ -239,34 +242,34 @@
         const loadingIndicator = document.getElementById('loadingIndicator');
         const heartContainer = document.getElementById('heartContainer');
 
-        let chatHistory = [{ role: "user", parts: [{ text: "Привет!" }] }]; // Инициализируем историю чата
-        let isSpeaking = false; // Флаг, чтобы избежать наложения речи
+        let chatHistory = [{ role: "user", parts: [{ text: "Привет!" }] }]; // Initialize chat history
+        let isSpeaking = false; // Flag to prevent speech overlap
 
-        // Функция для добавления сердечек на фон
+        // Function to add hearts to the background
         function createHeart() {
             const heart = document.createElement('div');
             heart.classList.add('heart');
-            const size = Math.random() * 20 + 10; // Размер от 10px до 30px
+            const size = Math.random() * 20 + 10; // Size from 10px to 30px
             heart.style.width = `${size}px`;
             heart.style.height = `${size}px`;
-            heart.style.left = `${Math.random() * 100}vw`; // Случайная позиция по горизонтали
-            heart.style.animationDuration = `${Math.random() * 5 + 5}s`; // Длительность анимации от 5 до 10 секунд
-            heart.style.animationDelay = `${Math.random() * 5}s`; // Задержка начала анимации
+            heart.style.left = `${Math.random() * 100}vw`; // Random horizontal position
+            heart.style.animationDuration = `${Math.random() * 5 + 5}s`; // Animation duration from 5 to 10 seconds
+            heart.style.animationDelay = `${Math.random() * 5}s`; // Animation start delay
             heartContainer.appendChild(heart);
 
-            // Удаляем сердце после завершения анимации, чтобы не накапливались элементы
+            // Remove heart after animation completes to prevent element accumulation
             heart.addEventListener('animationend', () => {
                 heart.remove();
             });
         }
 
-        // Создаем несколько сердечек при загрузке и затем периодически
+        // Create several hearts on load and then periodically
         for (let i = 0; i < 15; i++) {
             createHeart();
         }
-        setInterval(createHeart, 1000); // Создавать новое сердце каждую секунду
+        setInterval(createHeart, 1000); // Create a new heart every second
 
-        // Функция для добавления сообщения в чат
+        // Function to add a message to the chat
         function addMessage(text, sender) {
             const messageDiv = document.createElement('div');
             messageDiv.classList.add('message', sender);
@@ -278,47 +281,47 @@
             messageDiv.appendChild(messageBubble);
             chatMessages.appendChild(messageDiv);
 
-            // Прокрутка вниз
+            // Scroll down
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
-        // Функция для преобразования текста в речь
+        // Function to convert text to speech
         function speakText(text) {
             if ('speechSynthesis' in window) {
                 const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'ru-RU'; // Установить язык на русский
-                utterance.rate = 1.0; // Скорость речи
-                utterance.pitch = 1.0; // Высота тона
+                utterance.lang = 'ru-RU'; // Set language to Russian
+                utterance.rate = 1.0; // Speech rate
+                utterance.pitch = 1.0; // Pitch
 
-                // Найти русский голос, если доступен
+                // Find a Russian voice if available
                 const voices = speechSynthesis.getVoices();
                 const russianVoice = voices.find(voice => voice.lang === 'ru-RU');
                 if (russianVoice) {
                     utterance.voice = russianVoice;
                 } else {
-                    console.warn('Русский голос не найден, используется голос по умолчанию.');
+                    console.warn('Russian voice not found, using default voice.');
                 }
 
                 utterance.onstart = () => {
                     isSpeaking = true;
-                    // Можно добавить визуальный индикатор, что бот говорит
+                    // Add visual indicator that the bot is speaking
                 };
                 utterance.onend = () => {
                     isSpeaking = false;
-                    // Удалить визуальный индикатор
+                    // Remove visual indicator
                 };
                 utterance.onerror = (event) => {
-                    console.error('Ошибка синтеза речи:', event.error);
+                    console.error('Speech synthesis error:', event.error);
                     isSpeaking = false;
                 };
 
                 speechSynthesis.speak(utterance);
             } else {
-                console.warn('Ваш браузер не поддерживает Web Speech API.');
+                console.warn('Your browser does not support Web Speech API.');
             }
         }
 
-        // Обработчик отправки сообщения
+        // Message submission handler
         async function sendMessage() {
             const userMessage = chatInput.value.trim();
             if (userMessage === '') {
@@ -327,14 +330,16 @@
 
             addMessage(userMessage, 'user');
             chatInput.value = '';
-            loadingIndicator.style.display = 'block'; // Показать индикатор загрузки
+            loadingIndicator.style.display = 'block'; // Show loading indicator
 
             try {
-                // Добавляем сообщение пользователя в историю чата
+                // Add user message to chat history
                 chatHistory.push({ role: "user", parts: [{ text: userMessage }] });
 
                 const payload = { contents: chatHistory };
-                const apiKey = ""; // API ключ будет предоставлен средой выполнения
+                // The API key is automatically provided by the Canvas environment.
+                // Leave it as an empty string; Canvas will inject the correct key at runtime.
+                const apiKey = "";
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
                 const response = await fetch(apiUrl, {
@@ -350,19 +355,19 @@
                     result.candidates[0].content.parts.length > 0) {
                     const botResponseText = result.candidates[0].content.parts[0].text;
                     addMessage(botResponseText, 'bot');
-                    speakText(botResponseText); // Озвучить ответ бота
-                    // Добавляем ответ бота в историю чата
+                    speakText(botResponseText); // Speak the bot's response
+                    // Add bot's response to chat history
                     chatHistory.push({ role: "model", parts: [{ text: botResponseText }] });
                 } else {
                     addMessage('Извините, я не смог получить ответ. Попробуйте еще раз.', 'bot');
                     speakText('Извините, я не смог получить ответ. Попробуйте еще раз.');
                 }
             } catch (error) {
-                console.error('Ошибка при получении ответа от Gemini API:', error);
+                console.error('Error fetching response from Gemini API:', error);
                 addMessage('Произошла ошибка при подключении к сервису. Пожалуйста, попробуйте позже.', 'bot');
                 speakText('Произошла ошибка при подключении к сервису. Пожалуйста, попробуйте позже.');
             } finally {
-                loadingIndicator.style.display = 'none'; // Скрыть индикатор загрузки
+                loadingIndicator.style.display = 'none'; // Hide loading indicator
             }
         }
 
@@ -373,11 +378,11 @@
             }
         });
 
-        // Инициализация Web Speech API для получения голосов
+        // Initialize Web Speech API to get voices
         if ('speechSynthesis' in window) {
             speechSynthesis.onvoiceschanged = () => {
-                // Голоса загружены, можно использовать speakText
-                console.log('Голоса синтеза речи загружены.');
+                // Voices are loaded, speakText can be used
+                console.log('Speech synthesis voices loaded.');
             };
         }
     </script>
