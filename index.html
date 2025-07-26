@@ -26,16 +26,14 @@
             left: 0;
             pointer-events: none; /* To not interfere with interaction */
             overflow: hidden;
-            /* Добавляем размытие к фону контейнера сердечек */
-            backdrop-filter: blur(60px); /* Размытие 60% */
-            -webkit-backdrop-filter: blur(60px); /* Для совместимости с Safari */
+            backdrop-filter: blur(60px); /* Blur 60% */
+            -webkit-backdrop-filter: blur(60px); /* For Safari compatibility */
         }
 
         .heart {
             position: absolute;
             background-color: #FF69B4; /* Pink */
-            /* No rotation for vertical position */
-            animation: floatDown 10s infinite ease-in-out; /* Changed to floatDown */
+            animation: floatDown 10s infinite ease-in-out;
             opacity: 0; /* Initially invisible */
             border-radius: 50% 50% 0 0; /* Heart shape */
         }
@@ -58,7 +56,7 @@
             top: -50%;
         }
 
-        @keyframes floatDown { /* Changed for top-to-bottom movement */
+        @keyframes floatDown {
             0% {
                 transform: translateY(-100px); /* Starts slightly above the screen */
                 opacity: 0;
@@ -124,12 +122,19 @@
             margin-right: auto;
         }
 
-        .message-bubble {
-            padding: 0.75rem 1rem;
-            border-radius: 1rem;
+        /* Telegram-like voice message bubble */
+        .message.bot .message-bubble {
+            background-color: #F0C4D6; /* Softer pink/purple for bubble */
+            color: #000; /* Black text */
+            padding: 0.6rem 1rem; /* Adjusted padding */
+            border-radius: 1.2rem; /* More rounded corners */
             word-wrap: break-word;
             white-space: pre-wrap;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex; /* Flexbox for voice message layout */
+            align-items: center;
+            gap: 0.5rem; /* Space between play button and duration */
+            max-width: 90%; /* Slightly wider bubble */
         }
 
         .message.user .message-bubble {
@@ -138,10 +143,32 @@
             border-bottom-right-radius: 0.25rem;
         }
 
-        .message.bot .message-bubble {
-            background-color: #e0e0e0; /* Light gray for bot messages */
-            color: #000; /* Black text */
-            border-bottom-left-radius: 0.25rem;
+        /* Telegram-like play button */
+        .voice-play-button {
+            background-color: #FF69B4; /* Main pink for play button */
+            color: #fff; /* White icon */
+            border: none;
+            width: 36px; /* Fixed size */
+            height: 36px; /* Fixed size */
+            border-radius: 50%; /* Round button */
+            font-size: 1rem; /* Icon size */
+            cursor: pointer;
+            transition: transform 0.2s ease, background-color 0.2s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0; /* Prevent button from shrinking */
+        }
+
+        .voice-play-button:hover {
+            transform: scale(1.1);
+            background-color: #e05cb4; /* Darker pink on hover */
+        }
+
+        .voice-duration {
+            font-size: 0.85rem;
+            color: #333; /* Darker gray for better contrast */
+            margin-left: auto; /* Push duration to the right */
         }
 
         .chat-input-area {
@@ -222,10 +249,11 @@
             xBOT
         </div>
         <div class="chat-messages" id="chatMessages">
-            <!-- Messages will be here -->
+            <!-- Initial bot message as a voice message -->
             <div class="message bot">
                 <div class="message-bubble">
-                    Привет! Я чат-бот xBOT. Чем могу помочь?
+                    <button class="voice-play-button" data-text="Привет! Я чат-бот xBOT. Чем могу помочь?">▶️</button>
+                    <span class="voice-duration">0:00</span>
                 </div>
             </div>
         </div>
@@ -245,8 +273,9 @@
         const loadingIndicator = document.getElementById('loadingIndicator');
         const heartContainer = document.getElementById('heartContainer');
 
-        let chatHistory = [{ role: "user", parts: [{ text: "Привет!" }] }]; // Initialize chat history
-        let isSpeaking = false; // Flag to prevent speech overlap
+        let chatHistory = []; // Start with an empty history for Gemini API
+        let currentUtterance = null; // To keep track of the currently speaking utterance
+        let currentPlayButton = null; // To keep track of the current play button
 
         // Function to add hearts to the background
         function createHeart() {
@@ -272,55 +301,134 @@
         }
         setInterval(createHeart, 1000); // Create a new heart every second
 
-        // Function to add a message to the chat
-        function addMessage(text, sender) {
+        // Function to format time for voice duration
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = Math.floor(seconds % 60);
+            return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+        }
+
+        // Function to add a message to the chat (only user messages are visible as text)
+        function addMessage(text, sender, isVoice = false) {
             const messageDiv = document.createElement('div');
             messageDiv.classList.add('message', sender);
 
             const messageBubble = document.createElement('div');
             messageBubble.classList.add('message-bubble');
-            messageBubble.textContent = text;
+
+            if (isVoice) {
+                const playButton = document.createElement('button');
+                playButton.classList.add('voice-play-button');
+                playButton.textContent = '▶️';
+                playButton.dataset.text = text; // Store the text to be spoken
+                
+                const durationSpan = document.createElement('span');
+                durationSpan.classList.add('voice-duration');
+                durationSpan.textContent = '0:00'; // Placeholder, will be updated
+
+                messageBubble.appendChild(playButton);
+                messageBubble.appendChild(durationSpan);
+
+                playButton.addEventListener('click', () => {
+                    toggleSpeech(playButton, text, durationSpan);
+                });
+
+                // Calculate approximate duration for initial display
+                // This is a rough estimate, actual duration depends on voice and speed
+                const approxDuration = Math.ceil(text.length / 15); // ~15 chars per second
+                durationSpan.textContent = formatTime(approxDuration);
+
+            } else {
+                messageBubble.textContent = text;
+            }
 
             messageDiv.appendChild(messageBubble);
             chatMessages.appendChild(messageDiv);
 
             // Scroll down
             chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            return isVoice ? messageBubble.querySelector('.voice-play-button') : null; // Return the play button for voice messages
         }
 
-        // Function to convert text to speech
-        function speakText(text) {
-            if ('speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'ru-RU'; // Set language to Russian
-                utterance.rate = 1.0; // Speech rate
-                utterance.pitch = 1.0; // Pitch
+        // Function to toggle speech (play/pause)
+        function toggleSpeech(playButton, text, durationSpan) {
+            if (currentUtterance && currentUtterance.speaking) {
+                // If a different message is speaking, stop it
+                if (currentUtterance.text !== text) {
+                    speechSynthesis.cancel();
+                    if (currentPlayButton) {
+                        currentPlayButton.textContent = '▶️';
+                    }
+                    currentUtterance = null;
+                    currentPlayButton = null;
+                } else {
+                    // If the same message is speaking, toggle pause/resume
+                    if (speechSynthesis.paused) {
+                        speechSynthesis.resume();
+                        playButton.textContent = '⏸️';
+                    } else {
+                        speechSynthesis.pause();
+                        playButton.textContent = '▶️';
+                    }
+                    return; // Exit after toggling pause/resume
+                }
+            }
 
-                // Find a Russian voice if available
+            // If no speech is active or a new speech is starting
+            if (!currentUtterance || currentUtterance.text !== text) {
+                speechSynthesis.cancel(); // Stop any previous speech
+                if (currentPlayButton) {
+                    currentPlayButton.textContent = '▶️'; // Reset previous button icon
+                }
+
+                currentUtterance = new SpeechSynthesisUtterance(text);
+                currentUtterance.lang = 'ru-RU';
+                currentUtterance.rate = 1.0;
+                currentUtterance.pitch = 1.0;
+
                 const voices = speechSynthesis.getVoices();
                 const russianVoice = voices.find(voice => voice.lang === 'ru-RU');
                 if (russianVoice) {
-                    utterance.voice = russianVoice;
+                    currentUtterance.voice = russianVoice;
                 } else {
                     console.warn('Russian voice not found, using default voice.');
                 }
 
-                utterance.onstart = () => {
+                currentUtterance.onstart = () => {
+                    playButton.textContent = '⏸️';
+                    currentPlayButton = playButton;
                     isSpeaking = true;
-                    // Add visual indicator that the bot is speaking
+                    // Start updating duration
+                    let startTime = Date.now();
+                    const updateDuration = setInterval(() => {
+                        if (!currentUtterance || !currentUtterance.speaking || speechSynthesis.paused) {
+                            clearInterval(updateDuration);
+                            return;
+                        }
+                        const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+                        durationSpan.textContent = formatTime(elapsedSeconds);
+                    }, 1000);
                 };
-                utterance.onend = () => {
+
+                currentUtterance.onend = () => {
+                    playButton.textContent = '▶️';
+                    currentUtterance = null;
+                    currentPlayButton = null;
                     isSpeaking = false;
-                    // Remove visual indicator
+                    // Reset duration to full length or 0:00
+                    durationSpan.textContent = formatTime(Math.ceil(text.length / 15)); // Reset to approx total duration
                 };
-                utterance.onerror = (event) => {
+
+                currentUtterance.onerror = (event) => {
                     console.error('Speech synthesis error:', event.error);
+                    playButton.textContent = '▶️';
+                    currentUtterance = null;
+                    currentPlayButton = null;
                     isSpeaking = false;
                 };
 
-                speechSynthesis.speak(utterance);
-            } else {
-                console.warn('Your browser does not support Web Speech API.');
+                speechSynthesis.speak(currentUtterance);
             }
         }
 
@@ -331,18 +439,26 @@
                 return;
             }
 
-            // Добавляем сообщение пользователя в чат
-            addMessage(userMessage, 'user');
+            // Stop any ongoing speech when a new message is sent
+            if (currentUtterance) {
+                speechSynthesis.cancel();
+                if (currentPlayButton) {
+                    currentPlayButton.textContent = '▶️';
+                }
+                currentUtterance = null;
+                currentPlayButton = null;
+            }
+
+            addMessage(userMessage, 'user'); // User messages are still text for input clarity
             chatInput.value = '';
             loadingIndicator.style.display = 'block'; // Show loading indicator
 
             try {
-                // Add user message to chat history
+                // Add user message to chat history for Gemini API
                 chatHistory.push({ role: "user", parts: [{ text: userMessage }] });
 
                 const payload = { contents: chatHistory };
-                // Using the API key provided by the user
-                const apiKey = "AIzaSyCc-A1WP0QafzkNloI5eogLa3234QTCBW8";
+                const apiKey = "AIzaSyCc-A1WP0QafzkNloI5eogLa3234QTCBW8"; // Using the API key provided by the user
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
                 const response = await fetch(apiUrl, {
@@ -357,21 +473,23 @@
                     result.candidates[0].content && result.candidates[0].content.parts &&
                     result.candidates[0].content.parts.length > 0) {
                     const botResponseText = result.candidates[0].content.parts[0].text;
-                    // Удалена строка addMessage(botResponseText, 'bot');
-                    speakText(botResponseText); // Speak the bot's response
+                    const playButton = addMessage(botResponseText, 'bot', true); // Add as a voice message bubble
+                    
+                    // Do NOT automatically play the new voice message here.
+                    // User must click the play button.
+                    
                     // Add bot's response to chat history
                     chatHistory.push({ role: "model", parts: [{ text: botResponseText }] });
                 } else {
-                    // Если ответ не получен, все равно озвучиваем сообщение об ошибке
                     const errorMessage = 'Извините, я не смог получить ответ. Попробуйте еще раз.';
-                    // addMessage(errorMessage, 'bot'); // Можно оставить для отладки, но убираем для финальной версии
-                    speakText(errorMessage);
+                    const playButton = addMessage(errorMessage, 'bot', true);
+                    // Do NOT automatically play the error message here.
                 }
             } catch (error) {
                 console.error('Error fetching response from Gemini API:', error);
                 const errorMessage = 'Произошла ошибка при подключении к сервису. Пожалуйста, попробуйте позже.';
-                // addMessage(errorMessage, 'bot'); // Можно оставить для отладки
-                speakText(errorMessage);
+                const playButton = addMessage(errorMessage, 'bot', true);
+                // Do NOT automatically play the error message here.
             } finally {
                 loadingIndicator.style.display = 'none'; // Hide loading indicator
             }
@@ -384,11 +502,13 @@
             }
         });
 
-        // Initialize Web Speech API to get voices
+        // Initialize Web Speech API to get voices.
+        // Removed automatic playback of initial message.
         if ('speechSynthesis' in window) {
             speechSynthesis.onvoiceschanged = () => {
-                // Voices are loaded, speakText can be used
                 console.log('Speech synthesis voices loaded.');
+                // Removed automatic playback of initial message.
+                // User must click the play button on the initial message.
             };
         }
     </script>
