@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Чат-бот GS</title>
+    <title>Чат-бот xBOT</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -26,6 +26,9 @@
             left: 0;
             pointer-events: none; /* To not interfere with interaction */
             overflow: hidden;
+            /* Добавляем размытие к фону контейнера сердечек */
+            backdrop-filter: blur(60px); /* Размытие 60% */
+            -webkit-backdrop-filter: blur(60px); /* Для совместимости с Safari */
         }
 
         .heart {
@@ -216,18 +219,18 @@
 
     <div class="chat-container">
         <div class="chat-header">
-            Чат GS
+            xBOT
         </div>
         <div class="chat-messages" id="chatMessages">
             <!-- Messages will be here -->
             <div class="message bot">
                 <div class="message-bubble">
-                    Привет! Я чат-бот GS. Чем могу помочь?
+                    Привет! Я чат-бот xBOT. Чем могу помочь?
                 </div>
             </div>
         </div>
         <div class="loading-indicator" id="loadingIndicator" style="display: none;">
-            GS печатает...
+            xBOT печатает...
         </div>
         <div class="chat-input-area">
             <input type="text" id="chatInput" class="chat-input" placeholder="Введите ваше сообщение...">
@@ -337,9 +340,8 @@
                 chatHistory.push({ role: "user", parts: [{ text: userMessage }] });
 
                 const payload = { contents: chatHistory };
-                // The API key is automatically provided by the Canvas environment.
-                // Leave it as an empty string; Canvas will inject the correct key at runtime.
-                const apiKey = "";
+                // Using the API key provided by the user
+                const apiKey = "AIzaSyCc-A1WP0QafzkNloI5eogLa3234QTCBW8";
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
                 const response = await fetch(apiUrl, {
