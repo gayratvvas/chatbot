@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewpts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fff; /* Белый фон */
+            overflow: hidden; /* Скрыть прокрутку для анимации */
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .heart-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none; /* Чтобы не мешать взаимодействию */
+            overflow: hidden;
+        }
+
+        .heart {
+            position: absolute;
+            background-color: #FF69B4; /* Розовый */
+            /* Удалена ротация для вертикального положения */
+            animation: floatDown 10s infinite ease-in-out; /* Изменено на floatDown */
+            opacity: 0; /* Изначально невидимый */
+            border-radius: 50% 50% 0 0; /* Форма сердца */
+        }
+
+        .heart::before,
+        .heart::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: #FF69B4; /* Розовый */
+            border-radius: 50%;
+        }
+
+        .heart::before {
+            left: -50%;
+        }
+
+        .heart::after {
+            top: -50%;
+        }
+
+        @keyframes floatDown { /* Изменено для движения сверху вниз */
+            0% {
+                transform: translateY(-100px); /* Начинается чуть выше экрана */
+                opacity: 0;
+            }
+            20% {
+                opacity: 0.8;
+            }
+            80% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(100vh); /* Уходит за нижний край экрана */
+                opacity: 0;
+            }
+        }
+
+        .chat-container {
+            background-color: #f0f0f0; /* Светло-серый для контейнера */
+            border-radius: 1.5rem; /* Закругленные углы */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 90%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 2px solid #FF69B4; /* Розовая рамка (была золотая) */
+            position: relative;
+            z-index: 10; /* Над анимацией */
+        }
+
+        .chat-header {
+            background-color: #fff; /* Белый (была черная) */
+            color: #000; /* Черный текст (был золотой) */
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #FF69B4; /* Розовый (была золотая) */
+            font-weight: bold;
+            font-size: 1.25rem;
+            text-align: center;
+            border-radius: 1.5rem 1.5rem 0 0;
+        }
+
+        .chat-messages {
+            flex-grow: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            max-height: 70vh; /* Ограничение высоты для прокрутки */
+            background-color: #fff; /* Белый фон для сообщений (был черный) */
+        }
+
+        .message {
+            margin-bottom: 1rem;
+            display: flex;
+            max-width: 80%;
+        }
+
+        .message.user {
+            justify-content: flex-end;
+            margin-left: auto;
+        }
+
+        .message.bot {
+            justify-content: flex-start;
+            margin-right: auto;
+        }
+
+        .message-bubble {
+            padding: 0.75rem 1rem;
+            border-radius: 1rem;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .message.user .message-bubble {
+            background-color: #FF69B4; /* Розовый */
+            color: #fff; /* Белый текст */
+            border-bottom-right-radius: 0.25rem;
+        }
+
+        .message.bot .message-bubble {
+            background-color: #e0e0e0; /* Светло-серый для сообщений бота */
+            color: #000; /* Черный текст */
+            border-bottom-left-radius: 0.25rem;
+        }
+
+        .chat-input-area {
+            display: flex;
+            padding: 1.5rem;
+            background-color: #fff; /* Белый (была черная) */
+            border-top: 1px solid #FF69B4; /* Розовый (была золотая) */
+            border-radius: 0 0 1.5rem 1.5rem;
+        }
+
+        .chat-input {
+            flex-grow: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid #FF69B4; /* Розовая рамка (была золотая) */
+            border-radius: 0.75rem;
+            background-color: #f8f8f8; /* Очень светло-серый для ввода */
+            color: #000; /* Черный текст (был белый) */
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .chat-input:focus {
+            border-color: #FF69B4; /* Розовый при фокусе */
+        }
+
+        .send-button {
+            background-color: #FF69B4; /* Розовый (был золотой) */
+            color: #fff; /* Белый текст (был черный) */
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.75rem;
+            margin-left: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            font-weight: bold;
+            border: none;
+        }
+
+        .send-button:hover {
+            background-color: #e05cb4; /* Более темный розовый (был более темный золотой) */
+            transform: translateY(-2px);
+        }
+
+        .loading-indicator {
+            text-align: center;
+            padding: 1rem;
+            color: #FF69B4; /* Розовый (был золотой) */
+            font-style: italic;
+        }
+
+        /* Адаптивный дизайн */
+        @media (max-width: 768px) {
+            .chat-container {
+                width: 95%;
+                margin: 1rem;
+            }
+            .chat-messages {
+                max-height: 60vh;
+            }
+            .chat-input-area {
+                flex-direction: column;
+                padding: 1rem;
+            }
+            .chat-input {
+                margin-bottom: 0.75rem;
+            }
+            .send-button {
+                margin-left: 0;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="heart-container" id="heartContainer"></div>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            Чат GS
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <!-- Сообщения будут здесь -->
+            <div class="message bot">
+                <div class="message-bubble">
+                    Привет! Я чат-бот GS. Чем могу помочь?
+                </div>
+            </div>
+        </div>
+        <div class="loading-indicator" id="loadingIndicator" style="display: none;">
+            GS печатает...
+        </div>
+        <div class="chat-input-area">
+            <input type="text" id="chatInput" class="chat-input" placeholder="Введите ваше сообщение...">
+            <button id="sendButton" class="send-button">Отправить</button>
+        </div>
+    </div>
+
+    <script>
+        const chatInput = document.getElementById('chatInput');
+        const sendButton = document.getElementById('sendButton');
+        const chatMessages = document.getElementById('chatMessages');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const heartContainer = document.getElementById('heartContainer');
+
+        let chatHistory = [{ role: "user", parts: [{ text: "Привет!" }] }]; // Инициализируем историю чата
+        let isSpeaking = false; // Флаг, чтобы избежать наложения речи
+
+        // Функция для добавления сердечек на фон
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.classList.add('heart');
+            const size = Math.random() * 20 + 10; // Размер от 10px до 30px
+            heart.style.width = `${size}px`;
+            heart.style.height = `${size}px`;
+            heart.style.left = `${Math.random() * 100}vw`; // Случайная позиция по горизонтали
+            heart.style.animationDuration = `${Math.random() * 5 + 5}s`; // Длительность анимации от 5 до 10 секунд
+            heart.style.animationDelay = `${Math.random() * 5}s`; // Задержка начала анимации
+            heartContainer.appendChild(heart);
+
+            // Удаляем сердце после завершения анимации, чтобы не накапливались элементы
+            heart.addEventListener('animationend', () => {
+                heart.remove();
+            });
+        }
+
+        // Создаем несколько сердечек при загрузке и затем периодически
+        for (let i = 0; i < 15; i++) {
+            createHeart();
+        }
+        setInterval(createHeart, 1000); // Создавать новое сердце каждую секунду
+
+        // Функция для добавления сообщения в чат
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', sender);
+
+            const messageBubble = document.createElement('div');
+            messageBubble.classList.add('message-bubble');
+            messageBubble.textContent = text;
+
+            messageDiv.appendChild(messageBubble);
+            chatMessages.appendChild(messageDiv);
+
+            // Прокрутка вниз
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Функция для преобразования текста в речь
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'ru-RU'; // Установить язык на русский
+                utterance.rate = 1.0; // Скорость речи
+                utterance.pitch = 1.0; // Высота тона
+
+                // Найти русский голос, если доступен
+                const voices = speechSynthesis.getVoices();
+                const russianVoice = voices.find(voice => voice.lang === 'ru-RU');
+                if (russianVoice) {
+                    utterance.voice = russianVoice;
+                } else {
+                    console.warn('Русский голос не найден, используется голос по умолчанию.');
+                }
+
+                utterance.onstart = () => {
+                    isSpeaking = true;
+                    // Можно добавить визуальный индикатор, что бот говорит
+                };
+                utterance.onend = () => {
+                    isSpeaking = false;
+                    // Удалить визуальный индикатор
+                };
+                utterance.onerror = (event) => {
+                    console.error('Ошибка синтеза речи:', event.error);
+                    isSpeaking = false;
+                };
+
+                speechSynthesis.speak(utterance);
+            } else {
+                console.warn('Ваш браузер не поддерживает Web Speech API.');
+            }
+        }
+
+        // Обработчик отправки сообщения
+        async function sendMessage() {
+            const userMessage = chatInput.value.trim();
+            if (userMessage === '') {
+                return;
+            }
+
+            addMessage(userMessage, 'user');
+            chatInput.value = '';
+            loadingIndicator.style.display = 'block'; // Показать индикатор загрузки
+
+            try {
+                // Добавляем сообщение пользователя в историю чата
+                chatHistory.push({ role: "user", parts: [{ text: userMessage }] });
+
+                const payload = { contents: chatHistory };
+                const apiKey = ""; // API ключ будет предоставлен средой выполнения
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const botResponseText = result.candidates[0].content.parts[0].text;
+                    addMessage(botResponseText, 'bot');
+                    speakText(botResponseText); // Озвучить ответ бота
+                    // Добавляем ответ бота в историю чата
+                    chatHistory.push({ role: "model", parts: [{ text: botResponseText }] });
+                } else {
+                    addMessage('Извините, я не смог получить ответ. Попробуйте еще раз.', 'bot');
+                    speakText('Извините, я не смог получить ответ. Попробуйте еще раз.');
+                }
+            } catch (error) {
+                console.error('Ошибка при получении ответа от Gemini API:', error);
+                addMessage('Произошла ошибка при подключении к сервису. Пожалуйста, попробуйте позже.', 'bot');
+                speakText('Произошла ошибка при подключении к сервису. Пожалуйста, попробуйте позже.');
+            } finally {
+                loadingIndicator.style.display = 'none'; // Скрыть индикатор загрузки
+            }
+        }
+
+        sendButton.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Инициализация Web Speech API для получения голосов
+        if ('speechSynthesis' in window) {
+            speechSynthesis.onvoiceschanged = () => {
+                // Голоса загружены, можно использовать speakText
+                console.log('Голоса синтеза речи загружены.');
+            };
+        }
+    </script>
+</body>
+</html>
